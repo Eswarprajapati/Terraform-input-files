@@ -1,0 +1,3 @@
+prefix      = "eswardata"
+location    = "eastus"
+environment = "dev"

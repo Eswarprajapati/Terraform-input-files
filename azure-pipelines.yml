@@ -1,19 +1,17 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
-
+  - main
 pool:
   vmImage: ubuntu-latest
-
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - bash: |
+      set -euo pipefail
+      curl -fsSLO https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_linux_amd64.zip
+      curl -fsSLO https://releases.hashicorp.com/terraform/1.9.8/terraform_1.9.8_SHA256SUMS
+      grep 'terraform_1.9.8_linux_amd64.zip$' terraform_1.9.8_SHA256SUMS | sha256sum -c -
+      unzip -o terraform_1.9.8_linux_amd64.zip -d "$AGENT_TEMPDIRECTORY/terraform-bin"
+      export PATH="$AGENT_TEMPDIRECTORY/terraform-bin:$PATH"
+      terraform fmt -check -recursive
+      terraform init -backend=false
+      terraform validate
+      terraform test
+    displayName: Format validate and test infrastructure
